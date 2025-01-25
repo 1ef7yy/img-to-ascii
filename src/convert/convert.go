@@ -1,8 +1,10 @@
 package convert
 
 import (
+    "fmt"
     "github.com/1ef7yy/img-to-ascii/types"
     "image/color"
+   // fcolor "github.com/fatih/color"
 	"image"
     _ "image/jpeg"
     _ "image/png"
@@ -16,11 +18,16 @@ func ConvertImage(path string, opts types.Options) (string, error) {
         return "", err
     }
 
-    grayscale := toGrayscale(img)
+    if !opts.IsColored {
 
-    ascii := grayscalToASCII(grayscale)
+        grayscale := toGrayscale(img)
 
-    return ascii, nil
+        ascii := grayscaleToASCII(grayscale)
+        return ascii, nil
+    } else {
+        return coloredToASCII(img)
+    }
+
 }
 
 
@@ -65,7 +72,7 @@ func toGrayscale(img image.Image) image.Image {
 }
 
 
-func grayscalToASCII(grayImg image.Image) string {
+func grayscaleToASCII(grayImg image.Image) string {
     asciiChars := []rune("$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ")
 	var asciiArt string
 
@@ -81,4 +88,30 @@ func grayscalToASCII(grayImg image.Image) string {
 	}
 
 	return asciiArt
+}
+
+func coloredToASCII(img image.Image) (string, error) {
+    var asciiArt string
+    asciiChars := []rune("$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ")
+
+    bounds := img.Bounds()
+
+    for y := bounds.Min.Y; y < bounds.Max.Y; y ++ {
+        for x := bounds.Min.X; x < bounds.Max.X; x ++ {
+            c := img.At(x, y)
+            r, g, b, _ := c.RGBA()
+
+            r8 := uint8(r >> 8)
+            g8 := uint8(g >> 8)
+            b8 := uint8(b >> 8)
+
+            brightness := (int(r8)*299 + int(g8)*587 + int(b8)*114) / 1000
+            asciiChar := asciiChars[int(brightness)*len(asciiChars)/256]
+            coloredChar := fmt.Sprintf("\033[38;2;%d;%d;%dm%c\033[0m", r/256, g/256, b/256, asciiChar)
+            asciiArt += coloredChar
+        }
+        asciiArt += "\n"
+    }
+
+    return asciiArt, nil
 }
