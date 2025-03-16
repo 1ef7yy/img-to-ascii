@@ -1,4 +1,4 @@
-package main_test
+package main
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	testJPGPath = "static/sashaGC.PNG"
+	testJPGPath = "static/test.jpg"
 )
 
 func imgToAsciiColored() (string, error) {
