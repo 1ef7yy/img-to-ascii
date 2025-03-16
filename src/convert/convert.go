@@ -2,13 +2,14 @@ package convert
 
 import (
 	"fmt"
-	"github.com/1ef7yy/img-to-ascii/types"
-	"image/color"
-	// fcolor "github.com/fatih/color"
 	"image"
+	"image/color"
 	_ "image/jpeg"
 	_ "image/png"
 	"os"
+	"strings"
+
+	"github.com/1ef7yy/img-to-ascii/types"
 )
 
 func ConvertImage(path string, opts types.Options) (string, error) {
@@ -86,7 +87,7 @@ func grayscaleToASCII(grayImg image.Image) string {
 }
 
 func coloredToASCII(img image.Image) (string, error) {
-	var asciiArt string
+	var asciiArt strings.Builder
 	asciiChars := []rune("$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ")
 
 	bounds := img.Bounds()
@@ -103,10 +104,16 @@ func coloredToASCII(img image.Image) (string, error) {
 			brightness := (int(r8)*299 + int(g8)*587 + int(b8)*114) / 1000
 			asciiChar := asciiChars[int(brightness)*len(asciiChars)/256]
 			coloredChar := fmt.Sprintf("\033[38;2;%d;%d;%dm%c\033[0m", r/256, g/256, b/256, asciiChar)
-			asciiArt += coloredChar
+			_, err := asciiArt.WriteString(coloredChar)
+			if err != nil {
+				return "", err
+			}
 		}
-		asciiArt += "\n"
+		_, err := asciiArt.WriteString("\n")
+		if err != nil {
+			return "", err
+		}
 	}
 
-	return asciiArt, nil
+	return asciiArt.String(), nil
 }
