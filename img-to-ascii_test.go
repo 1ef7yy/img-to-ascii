@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/1ef7yy/img-to-ascii/src/convert"
@@ -9,7 +8,7 @@ import (
 )
 
 var (
-	testJPGPath = "static/sashaGC.PNG"
+	testJPGPath = "static/test.jpg"
 )
 
 func imgToAsciiColored() (string, error) {
@@ -27,11 +26,10 @@ func imgToAsciiColored() (string, error) {
 	return val, err
 }
 
-func imgToAsciiColoredBenchmark(b *testing.B) {
-	val, err := imgToAsciiColored()
+func BenchmarkImgToColor(b *testing.B) {
+	_, err := imgToAsciiColored()
 
 	if err != nil {
 		b.Error(err)
 	}
-	fmt.Println(val)
 }
