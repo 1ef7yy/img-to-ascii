@@ -22,13 +22,11 @@ func ConvertImage(path string, opts types.Options) (string, error) {
 	if !opts.IsColored {
 
 		grayscale := toGrayscale(img)
+		return grayscaleToASCII(grayscale)
 
-		ascii := grayscaleToASCII(grayscale)
-		return ascii, nil
 	} else {
 		return coloredToASCII(img)
 	}
-
 }
 
 func openImage(path string) (image.Image, error) {
@@ -68,9 +66,9 @@ func toGrayscale(img image.Image) image.Image {
 	return grayImg
 }
 
-func grayscaleToASCII(grayImg image.Image) string {
+func grayscaleToASCII(grayImg image.Image) (string, error) {
 	asciiChars := []rune("$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ")
-	var asciiArt string
+	var asciiArt strings.Builder
 
 	bounds := grayImg.Bounds()
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
@@ -78,12 +76,18 @@ func grayscaleToASCII(grayImg image.Image) string {
 			c := grayImg.At(x, y)
 			grayVal := color.GrayModel.Convert(c).(color.Gray).Y
 			asciiChar := asciiChars[int(grayVal)*len(asciiChars)/256]
-			asciiArt += string(asciiChar)
+			_, err := asciiArt.WriteString(string(asciiChar))
+			if err != nil {
+				return "", err
+			}
 		}
-		asciiArt += "\n"
+		_, err := asciiArt.WriteString("\n")
+		if err != nil {
+			return "", err
+		}
 	}
 
-	return asciiArt
+	return asciiArt.String(), nil
 }
 
 func coloredToASCII(img image.Image) (string, error) {
