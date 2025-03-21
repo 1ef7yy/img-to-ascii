@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	testJPGPath = "static/test.jpg"
+	testJPGPath = "static/sashaGC.PNG"
 )
 
 func imgToAsciiColored() (string, error) {
