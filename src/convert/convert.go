@@ -7,10 +7,37 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/1ef7yy/img-to-ascii/types"
 )
+
+func parseColor(color string) ([]int, error) {
+	// should be of format R,G,B (for example 123,34,5)
+	colors := strings.Split(color, ",")
+	if len(colors) != 3 {
+		return nil, fmt.Errorf("error splitting single color value")
+	}
+
+	var RGBValues []int
+
+	for _, color := range colors {
+		val, err := strconv.Atoi(color)
+
+		if err != nil {
+			return nil, fmt.Errorf("error converting RGB values to numbers: %s", err.Error())
+		}
+
+		if val > 255 || val < 0{
+			return nil, fmt.Errorf("one of RGB values is over 255 or lower than 0")
+		}
+
+		RGBValues = append(RGBValues, val)
+	}
+
+	return RGBValues, nil
+}
 
 func ConvertImage(path string, opts types.Options) (string, error) {
 	img, err := openImage(path)
@@ -19,13 +46,17 @@ func ConvertImage(path string, opts types.Options) (string, error) {
 		return "", err
 	}
 
-	if !opts.IsColored {
-
+	if opts.IsColored {
+		return coloredToASCII(img)
+	} else if opts.SingleColor != "" {
+		RGBValues, err := parseColor(opts.SingleColor)
+		if err != nil {
+			return "", fmt.Errorf("could not parse RGBValues: %s", err.Error())
+		}
+		return singleColorToASCII(img, RGBValues)
+	} else {
 		grayscale := toGrayscale(img)
 		return grayscaleToASCII(grayscale)
-
-	} else {
-		return coloredToASCII(img)
 	}
 }
 
@@ -45,6 +76,35 @@ func openImage(path string) (image.Image, error) {
 	}
 
 	return img, err
+}
+
+
+// TODO
+func singleColorToASCII(img image.Image, RGB []int) (string, error) {
+	asciiChars := []rune("$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ")
+
+	var asciiArt strings.Builder
+
+	fmt.Println("RGB Values: ", RGB)
+
+	bounds := img.Bounds()
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			c := img.At(x, y)
+			grayVal := color.GrayModel.Convert(c).(color.Gray).Y
+			asciiChar := asciiChars[int(grayVal)*len(asciiChars)/256]
+			_, err := asciiArt.WriteString(fmt.Sprintf("\033[38;2;%d;%d;%dm%c\033[0m", RGB[0], RGB[1], RGB[2], asciiChar))
+			if err != nil {
+				return "", err
+			}
+		}
+		_, err := asciiArt.WriteString("\n")
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return asciiArt.String(), nil
 }
 
 func toGrayscale(img image.Image) image.Image {

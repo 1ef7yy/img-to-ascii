@@ -6,10 +6,10 @@
 
 
 TODO:
-- [ ] Add one-colored output
+- [x] Add one-colored output
 - [ ] Add option to make detailed output or no
 - [ ] Add feature to convert multiple images at once
 - [ ] Add feature to flip or rotate?
 - [ ] Add feature to scale?
-- [ ] Save to certain path
-- [ ] Only save, no output
+- [x] Save to certain path
+- [x] Only save, no output
