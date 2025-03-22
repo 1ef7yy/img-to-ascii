@@ -13,10 +13,12 @@ import (
 var opts = types.Options{}
 
 func initFlags() {
-	flag.BoolVar(&opts.IsColored, "color", false, "Toggles the color for output")
+	flag.BoolVar(&opts.IsColored, "is-colored", false, "Toggles the color for output")
 	flag.StringVar(&opts.SaveToFile, "save", "", "Saves the output to a file")
 	flag.BoolVar(&opts.NoOutput, "no-output", false, "Doesn't output the image to console")
 	flag.StringVar(&opts.Src, "source", "", "Path to source image")
+	flag.StringVar(&opts.Recursive, "recursive", "", "Path to a directory of images") // TODO
+	flag.StringVar(&opts.SingleColor, "single-color", "", "Select color to make the whole output image this color")
 	flag.Parse()
 }
 
