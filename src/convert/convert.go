@@ -29,7 +29,7 @@ func parseColor(color string) ([]int, error) {
 			return nil, fmt.Errorf("error converting RGB values to numbers: %s", err.Error())
 		}
 
-		if val > 255 || val < 0{
+		if val > 255 || val < 0 {
 			return nil, fmt.Errorf("one of RGB values is over 255 or lower than 0")
 		}
 
@@ -77,7 +77,6 @@ func openImage(path string) (image.Image, error) {
 
 	return img, err
 }
-
 
 // TODO
 func singleColorToASCII(img image.Image, RGB []int) (string, error) {
